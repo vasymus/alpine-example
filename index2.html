@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="js/UptimeForm.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/focus@3.12.0/dist/cdn.js"></script>
+    <!--    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.js"></script>-->
+    <script defer src="./temp.js"></script>
+</head>
+<body>
+<form
+    x-data="alpineCreateEquipmentFormMainComponent()"
+    action="#">
+
+    <div>
+        <select
+                x-data="alpineCreateSelectUI('select-1', JSON.parse(decodeURIComponent('%5B%7B%22value%22%3A%22%22%2C%22label%22%3A%22Please%20select%22%7D%2C%7B%22value%22%3A%22uuid-1%22%2C%22label%22%3A%22foo%22%7D%2C%7B%22value%22%3A%22uuid-2%22%2C%22label%22%3A%22bar%22%7D%2C%7B%22value%22%3A%22uuid-3%22%2C%22label%22%3A%22baz%22%7D%5D')))"
+                x-ref="select-1"
+                @set-options.window="handleSetOptions"
+                @add-option.window="handleAddOption"
+                class="custom-dropdown"
+                name="select-1"
+                id="select-1"
+        >
+            <template x-for="option in options" :key="option.value">
+                <option :value="option.value" x-text="option.label" :selected="String(option.value) === String(value)"></option>
+            </template>
+        </select>
+    </div>
+
+    <div>
+        <select
+                x-data="alpineCreateSelectUI('select2', [
+                    {value: '', label: 'Please select'},
+                    {value: 'uuid-1', label: 'foo'},
+                    {value: 'uuid-2', label: 'bar'},
+                    {value: 'uuid-3', label: 'baz'}
+                ])"
+                x-ref="select2"
+                @set-options.window="handleSetOptions"
+                @add-option.window="handleAddOption"
+                class="custom-dropdown"
+                name="select2"
+                id="select2"
+        >
+            <template x-for="option in options" :key="option.value">
+                <option :value="option.value" x-text="option.label" :selected="String(option.value) === String(value)"></option>
+            </template>
+        </select>
+    </div>
+
+    <div>
+        <input x-data="alpineCreateDateUI('myDate1')" x-ref="myDate1" type="text" class="date" :value="value" />
+    </div>
+
+    <div>
+        <h3>state:</h3>
+        <div x-text="JSON.stringify(state)"></div>
+    </div>
+
+    <div
+        x-data="alpineCreateModal('testModal')"
+        @open-modal.window="open"
+        @close-modal.window="close"
+    >
+        <!-- Modal -->
+        <template x-teleport="body">
+            <div
+                x-show="isOpen"
+                x-on:keydown.escape.prevent.stop="cancel"
+                role="dialog"
+                aria-modal="true"
+                x-id="['modal-title']"
+                :aria-labelledby="$id('modal-title')"
+                class="fixed inset-0 overflow-y-auto"
+                :style="{zIndex: zIndex}"
+            >
+                <!-- Overlay -->
+                <div x-show="isOpen" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-50"></div>
+
+                <!-- Panel -->
+                <div
+                    x-show="isOpen"
+                    x-transition
+                    x-on:click="cancel"
+                    class="relative flex min-h-screen items-center justify-center p-16px"
+                >
+                    <div
+                        x-on:click.stop
+                        x-trap.noscroll.inert="isOpen"
+                        class="relative w-full max-w-2xl overflow-y-auto rounded-8px bg-white p-30px shadow-lg"
+                    >
+                        <template x-if="!!title">
+                            <h2 class="cmsm-title" :id="$id('modal-title')" x-text="title"></h2>
+                        </template>
+
+                        <template x-if="!!htmlContent">
+                            <div x-html="htmlContent" class="modal-content"></div>
+                        </template>
+
+                        <div class="box-footer flex items-center justify-space-between pt-32px">
+                            <button
+                                type="button"
+                                x-on:click="cancel"
+                                class="text-sm font-semibold leading-6 text-gray-900"
+                            >cancel</button>
+
+                            <button
+                                type="button"
+                                :disabled="isSaveBtnDisabled"
+                                x-on:click="save"
+                                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            >save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <div class="my-2">
+        <button class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" type="button" @click="testManualAddOption1">Manual add option 1</button>
+    </div>
+
+    <div class="my-2">
+        <button class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" type="button" @click="testManualAddOption2">Manual add option 2</button>
+    </div>
+
+    <div class="my-2">
+        <button class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" type="button" @click="testManualSetOptions1">Manual set options 1</button>
+    </div>
+
+    <div class="my-2">
+        <button class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" type="button" @click="testManualSetOptions2">Manual set options 2</button>
+    </div>
+
+    <div class="my-2">
+        <button class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" type="button" @click="testManualSetDate">Manual change date</button>
+    </div>
+
+    <div class="my-2">
+        <button class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" type="button" @click="testOpenModal">Open modal</button>
+    </div>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ex non quia quidem! Aliquam cumque doloremque esse quia! Ad, cupiditate, dicta dignissimos dolorem eius eveniet, incidunt ipsa mollitia odit quas veritatis!</p>
+</form>
+
+<script>
+    class AlpineBaseComponent {
+        id;
+
+        /**
+         * @param {string} id
+         */
+        constructor(id) {
+            this.id = id;
+        }
+
+        /**
+         * Child component will have access to parent state
+         *
+         * @param {Object.<number|string, string|number|boolean|null|undefined>} keyValueMap
+         */
+        setState(keyValueMap) {
+            for (let key in keyValueMap) {
+                this.$data.state[key] = keyValueMap[key];
+            }
+        }
+
+        /**
+         * @param {string} selectId
+         * @param {{value: string|number, label: string|number}} option
+         */
+        addOption(selectId, option) {
+            this.$dispatch('add-option', {
+                id: selectId,
+                payload: {
+                    option,
+                }
+            });
+        }
+
+        /**
+         * @param {string} selectId
+         * @param {{value: string|number, label: string|number}[]} options
+         */
+        setOptions(selectId, options) {
+            this.$dispatch('set-options', {
+                id: selectId,
+                payload: {
+                    options
+                }
+            });
+        }
+
+        /**
+         * @callback alpineModalOpenSuccessCB
+         */
+        /**
+         * @callback alpineModalOpenCancelCB
+         */
+        /**
+         * @param {string} modalId
+         * @param {Object} [config]
+         * @param {boolean} [config.isOpen]
+         * @param {string} [config.title]
+         * @param {number} [config.zIndex]
+         * @param {string} [config.htmlContent]
+         * @param {boolean} [config.isSuccessEnabled]
+         * @param {alpineModalOpenSuccessCB} [config.successCB]
+         * @param {alpineModalOpenCancelCB} [config.cancelCB]
+         */
+        openModal(modalId, {isOpen, title, zIndex, htmlContent, isSuccessEnabled, successCB, cancelCB} = {}) {
+            this.$dispatch('open-modal', {
+                id: modalId,
+                payload: {
+                    isOpen,
+                    title,
+                    zIndex,
+                    htmlContent,
+                    isSuccessEnabled,
+                    successCB,
+                    cancelCB,
+                }
+            })
+        }
+
+        /**
+         * @param {string} modalId
+         */
+        closeModal(modalId) {
+            this.$dispatch('close-modal', {
+                id: modalId,
+            });
+        }
+
+        /**
+         * @param {string} id
+         *
+         * @return {string}
+         */
+        getValuePath(id) {
+            return `state.${id}`;
+        }
+
+        /**
+         * @see https://alpinejs.dev/directives/ref
+         *
+         * @return {HTMLElement|undefined}
+         */
+        getElement() {
+            return this.$refs[this.id];
+        }
+    }
+
+    class AlpineMainComponent extends AlpineBaseComponent {
+        state = {};
+
+        /**
+         * @param {string} id
+         * @param {Object} globalState
+         */
+        constructor(id, globalState = {}) {
+            super(id);
+            this.state = globalState;
+        }
+    }
+
+    class AlpineEquipmentForm extends AlpineMainComponent {
+        constructor(id, globalState = {}) {
+            super(id, globalState);
+
+            this.testManualAddOption1 = this.testManualAddOption1.bind(this);
+            this.testManualAddOption2 = this.testManualAddOption2.bind(this);
+            this.testManualSetOptions1 = this.testManualSetOptions1.bind(this);
+            this.testManualSetOptions2 = this.testManualSetOptions2.bind(this);
+            this.testManualSetDate = this.testManualSetDate.bind(this);
+            this.testOpenModal = this.testOpenModal.bind(this);
+        }
+
+        testManualAddOption1() {
+            this.addOption('select-1', {
+                value: 'hello',
+                label: 'world',
+            });
+        }
+
+        testManualAddOption2() {
+            this.addOption('select2', {
+                value: 'hello2',
+                label: 'world2',
+            });
+        }
+
+        testManualSetOptions1() {
+            this.setOptions('select-1', [
+                {
+                    value: 1,
+                    label: 'one',
+                },
+                {
+                    value: 2,
+                    label: 'two',
+                },
+                {
+                    value: 3,
+                    label: 'three',
+                },
+            ]);
+        }
+
+        testManualSetOptions2() {
+            this.setOptions('select2', [
+                {
+                    value: 4,
+                    label: 'four',
+                },
+                {
+                    value: 5,
+                    label: 'five',
+                },
+                {
+                    value: 6,
+                    label: 'six',
+                },
+            ]);
+        }
+
+        testManualSetDate() {
+            this.setState({
+                myDate1: '2000-01-02'
+            })
+        }
+
+        testOpenModal() {
+            this.openModal('testModal', {
+                title: 'hello',
+                successCB: () => console.log('success'),
+                cancelCB: () => console.log('cancel'),
+                // isSuccessEnabled: false,
+                htmlContent: '<h3>Some html</h3>'
+            });
+        }
+    }
+
+    class AlpineSelectUI extends AlpineBaseComponent {
+        options = [];
+
+        /**
+         * @param {string} id
+         * @param {{value: string|number, label: string|number, isSelected: boolean|null}[]} options
+         */
+        constructor(id, options = []) {
+            super(id);
+            this.options = options;
+            this.init = this.init.bind(this);
+            this._bootSelect = this._bootSelect.bind(this);
+            this._refreshSelect = this._refreshSelect.bind(this);
+            this.handleAddOption = this.handleAddOption.bind(this);
+            this.handleSetOptions = this.handleSetOptions.bind(this);
+
+            /**
+             * @see https://stackoverflow.com/a/37973399
+             */
+            Object.defineProperty(this, 'value', {
+                get: function() {
+                    return this.$data.state[this.id]
+                }.bind(this)
+            });
+        }
+
+        /**
+         * @param {CustomEvent} event
+         */
+        handleSetOptions(event) {
+            if (event.detail && event.detail.id === this.id) {
+                this.$data.options = event.detail.payload.options.map(el => ({...el}));
+            }
+        }
+
+        /**
+         * @param {CustomEvent} event
+         */
+        handleAddOption(event) {
+            if (event.detail && event.detail.id === this.id) {
+                let options = this.$data.options.map(el => ({...el}));
+                options.push({...event.detail.payload.option});
+                this.$data.options = options;
+            }
+        }
+
+        init() {
+            jQuery(() => {
+                this._bootSelect();
+
+                jQuery(this.getElement()).on('selectmenuchange', (event) => {
+                    let selectedIndex = event.target.selectedIndex;
+                    let options = this.$data.options;
+
+                    this.setState({
+                        [`${this.id}`]: options[selectedIndex]?.value || null,
+                    })
+                });
+
+                this.$watch(this.getValuePath(this.id), async () => {
+                    await this.$nextTick();
+
+                    this._refreshSelect();
+                });
+
+
+            });
+
+            this.$watch('options', async () => {
+                await this.$nextTick();
+
+                this._refreshSelect();
+            });
+        }
+
+        _bootSelect() {
+            jQuery(this.getElement()).selectmenu();
+        }
+
+        _refreshSelect() {
+            jQuery(this.getElement()).selectmenu('destroy');
+            this._bootSelect();
+        }
+    }
+
+    class AlpineDateUI extends AlpineBaseComponent {
+        /**
+         * @param {string} id
+         */
+        constructor(id) {
+            super(id);
+            this.init = this.init.bind(this);
+
+            /**
+             * @see https://stackoverflow.com/a/37973399
+             */
+            Object.defineProperty(this, 'value', {
+                get: function() {
+                    return this.$data.state[this.id]
+                }.bind(this)
+            }); // todo think if need
+        }
+
+        init() {
+            jQuery(() => {
+                jQuery(this.getElement()).on('change', (event) => {
+                    this.setState({
+                        [`${this.id}`]: event.target.value,
+                    });
+                });
+
+                this.$watch(this.getValuePath(this.id), async (value) => {
+                    await this.$nextTick();
+
+                    jQuery(this.getElement()).datepicker('setDate', value);
+                })
+            });
+        }
+    }
+
+    class AlpineModal extends AlpineBaseComponent {
+        isOpen;
+        title;
+        zIndex;
+        htmlContent;
+        isSuccessEnabled;
+
+        _successCB;
+        _cancelCB;
+
+        /**
+         * @param {string} id
+         * @param {Object} config
+         * @param {boolean} config.isOpen
+         * @param {string} config.title
+         * @param {number} config.zIndex
+         * @param {string} config.htmlContent
+         * @param {boolean} config.isSuccessEnabled
+         */
+        constructor(id, {
+            isOpen = false,
+            title = '',
+            zIndex = 10,
+            htmlContent = '',
+            isSuccessEnabled = true,
+        } = {}) {
+            super(id);
+            this.isOpen = isOpen;
+            this.title = title;
+            this.zIndex = zIndex;
+            this.htmlContent = htmlContent;
+            this.isSuccessEnabled = isSuccessEnabled;
+
+            this.open = this.open.bind(this);
+            this.close = this.close.bind(this);
+            this.setIsSuccessEnabled = this.setIsSuccessEnabled.bind(this);
+            this.save = this.save.bind(this);
+            this.cancel = this.cancel.bind(this);
+            this._close = this._close.bind(this);
+            this._clearCB = this._clearCB.bind(this);
+
+            /**
+             * @see https://stackoverflow.com/a/37973399
+             */
+            Object.defineProperty(this, 'isSaveBtnDisabled', {
+                get: function() {
+                    return (!(typeof this.$data.isSuccessEnabled === 'undefined' || this.$data.isSuccessEnabled));
+                }.bind(this)
+            });
+        }
+
+        /**
+         * @param {CustomEvent} event
+         */
+        open(event) {
+            if (event.detail && event.detail.id === this.id) {
+                let {
+                    isOpen = true,
+                    title = '',
+                    zIndex = 10,
+                    htmlContent = '',
+                    isSuccessEnabled = true,
+                    successCB,
+                    cancelCB,
+                } = event.detail.payload;
+
+                this.$data.isOpen = isOpen;
+                this.$data.title = title;
+                this.$data.zIndex = zIndex;
+                this.$data.htmlContent = htmlContent;
+                this.$data.isSuccessEnabled = isSuccessEnabled;
+
+                this.$data._successCB = typeof successCB === 'function' ? successCB : null;
+                this.$data._cancelCB = typeof cancelCB === 'function' ? cancelCB : null;
+            }
+        }
+
+        /**
+         * @param {CustomEvent} event
+         */
+        close(event) {
+            if (event.detail && event.detail.id === this.id) {
+                this.cancel();
+            }
+        }
+
+        /**
+         * @param {CustomEvent} event
+         */
+        setIsSuccessEnabled(event) {
+            if (event.detail && event.detail.id === this.id) {
+                let {isSuccessEnabled} = event.detail.payload;
+
+                this.$data.isSuccessEnabled = isSuccessEnabled;
+            }
+        }
+
+        save() {
+            this._close();
+
+            if (typeof this.$data._successCB === 'function') {
+                this.$data._successCB();
+            }
+
+            this._clearCB();
+        }
+
+        cancel() {
+            this._close();
+
+            if (typeof this.$data._cancelCB === 'function') {
+                this.$data._cancelCB();
+            }
+
+            this._clearCB();
+        }
+
+        _close() {
+            this.$data.isOpen = false;
+            this.$data.title = '';
+            this.$data.zIndex = 10;
+            this.$data.htmlContent = '';
+        }
+
+        _clearCB() {
+            this.$data._successCB = undefined;
+            this.$data._cancelCB = undefined;
+        }
+    }
+
+    /**
+     * @return {AlpineEquipmentForm}
+     */
+    function alpineCreateEquipmentFormMainComponent() {
+        return new AlpineEquipmentForm('equipmentForm', {
+            'select-1': '',
+            select2: 'uuid-2',
+            myDate1: '2021-02-07',
+        });
+    }
+
+    /**
+     * @param {string} id
+     * @param {{value: string|number, label: string|number, isSelected: boolean|null}[]} options
+     *
+     * @return {AlpineSelectUI}
+     */
+    function alpineCreateSelectUI(id, options = []) {
+        return new AlpineSelectUI(id, options);
+    }
+
+    /**
+     * @param {string} id
+     *
+     * @return {AlpineDateUI}
+     */
+    function alpineCreateDateUI(id) {
+        return new AlpineDateUI(id);
+    }
+
+    /**
+     * @param {string} id
+     * @param {Object} config
+     *
+     * @return {AlpineModal}
+     */
+    function alpineCreateModal(id, config = {}) {
+        return new AlpineModal(id, config)
+    }
+</script>
+</body>
+</html>
